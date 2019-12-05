@@ -141,10 +141,26 @@ export class ImageItCtrl extends MetricsPanelCtrl {
 
                 // We need to replace possible variables in the sensors name
                 const effectiveName = ctrl.templateSrv.replace(sensor.metric);
-
                 const metric = metricMap[effectiveName];
-
                 const metricValue = (metric !== undefined) ? metric.value : undefined;
+
+                let xmetricValue
+                if (!(parseFloat(sensor.xlocation))) {
+                    const xeffectiveName = ctrl.templateSrv.replace(sensor.xlocation);
+                    const xmetric = metricMap[xeffectiveName];
+                    xmetricValue = (xmetric !== undefined) ? xmetric.value : undefined;
+                } else {
+                    xmetricValue = sensor.xlocation;
+                }
+
+                let ymetricValue
+                if (!(parseFloat(sensor.ylocation))) {
+                    const yeffectiveName = ctrl.templateSrv.replace(sensor.ylocation);
+                    const ymetric = metricMap[yeffectiveName];
+                    ymetricValue = (ymetric !== undefined) ? ymetric.value : undefined;
+                } else {
+                    ymetricValue = sensor.ylocation;
+                }
 
                 // update existing valueMappings
                 for (const valueMapping of ctrl.panel.valueMappings) {
@@ -195,6 +211,9 @@ export class ImageItCtrl extends MetricsPanelCtrl {
                 } else {
                     const formatFunc = getValueFormat(sensor.unitFormat);
                     sensor.valueFormatted = formatFunc(metricValue, sensor.decimals);
+
+                    sensor.xLocationProcessed = xmetricValue;
+                    sensor.yLocationProcessed = ymetricValue;
                 }
             }
 
@@ -284,8 +303,8 @@ export class ImageItCtrl extends MetricsPanelCtrl {
                             'id': (event.target).getAttribute('refId')
                         });
 
-                        sensor.xlocation = newX;
-                        sensor.ylocation = newY;
+                        sensor.xLocationProcessed = newX;
+                        sensor.yLocationProcessed = newY;
 
                         // reset the starting sensor points
                         target.setAttribute('data-x', 0);
@@ -384,14 +403,16 @@ function ValueColorMapping() {
 
 function Sensor() {
     this.metric = '';
-    this.xlocation = 50;
-    this.ylocation = 25;
+    this.xlocation = '';
+    this.ylocation = '';
     this.bgColor = 'rgba(64,64,64,1.000)';
     this.fontColor = 'rgba(255,255,255,1.000)';
     this.size = 14;
     this.visible = true;
     this.renderValue = true;
     this.valueFormatted = '';
+    this.xLocationProcessed = '';
+    this.yLocationProcessed = '';
     this.valueUnit = '';
     this.displayName = '';
     this.link_url = '';
